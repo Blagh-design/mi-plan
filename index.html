@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi plan</title>
+<meta name="description" content="Tu comida, tu súper y tu peso. Funciona sin internet.">
+<meta name="theme-color" content="#F5FBF6">
+<meta name="color-scheme" content="light dark">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preload" href="fonts/material-symbols-rounded.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/app.css">
+<script>
+  // Colores antes de dibujar, para que no parpadee (el ajuste vive en el teléfono).
+  try {
+    var t = localStorage.getItem('miplan-tema'), h = new Date().getHours()
+    if (t === 'menta' || t === 'noche') document.documentElement.setAttribute('data-tema', t)
+    else if (t === 'hora') document.documentElement.setAttribute('data-tema', h >= 19 || h < 7 ? 'noche' : 'menta')
+  } catch (e) {}
+</script>
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<div id="app"><div class="cargando">Cargando Mi plan…</div></div>
+<div id="capa"></div>
+<div id="avisos" aria-live="polite"></div>
+<noscript><p style="padding:20px">Mi plan necesita JavaScript.</p></noscript>
+</body>
+</html>

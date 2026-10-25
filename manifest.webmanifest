@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "Mi plan",
+  "short_name": "Mi plan",
+  "description": "Tu comida, tu súper y tu peso. Funciona sin internet.",
+  "lang": "es-MX",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5FBF6",
+  "theme_color": "#1B6B4F",
+  "categories": ["health", "food", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Anotar peso", "short_name": "Peso", "url": "./?atajo=peso", "icons": [{ "src": "icons/atajo-peso.png", "sizes": "96x96", "type": "image/png" }] },
+    { "name": "Hoy", "short_name": "Hoy", "url": "./?atajo=hoy", "icons": [{ "src": "icons/atajo-hoy.png", "sizes": "96x96", "type": "image/png" }] },
+    { "name": "Súper", "short_name": "Súper", "url": "./?atajo=super", "icons": [{ "src": "icons/atajo-super.png", "sizes": "96x96", "type": "image/png" }] }
+  ]
+}
