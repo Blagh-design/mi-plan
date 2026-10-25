@@ -3,7 +3,7 @@
 // o se escriben en el teléfono, y se quedan en el teléfono.
 // Precios: promedios de Profeco (abr–may 2026) o estimados; cada quien los cambia en su teléfono.
 
-export const VERSION = '1.0.0'
+export const VERSION = '1.1.0'
 
 export const COMIDAS = ['desayuno', 'comida', 'tarde', 'cena']
 export const NOMBRE_COMIDA = { desayuno: 'Desayuno', comida: 'Comida', tarde: 'Tarde', cena: 'Cena' }

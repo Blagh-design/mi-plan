@@ -67,7 +67,17 @@ const perfil = () => kv('perfil', null)
 const aj = () => kv('ajustes', {})
 
 async function escribe(store, obj) {
-  try { await A.pon(store, obj) } catch (e) { aviso('No se pudo guardar en el teléfono: ' + (e?.message || e), 'mal') }
+  try { await A.pon(store, obj); marca() } catch (e) { aviso('No se pudo guardar en el teléfono: ' + (e?.message || e), 'mal') }
+}
+// La pestaña de Chrome y la app instalada comparten los datos. Si una guarda algo, la otra lo recarga al volver.
+function marca() { try { E.marca = Date.now() + '-' + Math.random().toString(36).slice(2, 6); localStorage.setItem('miplan-marca', E.marca) } catch (e) { /* sin localStorage */ } }
+async function recargaSiCambio() {
+  let m = null
+  try { m = localStorage.getItem('miplan-marca') } catch (e) { return }
+  if (!m || m === E.marca || E.hojaAbierta) return
+  const d = await A.cargar()
+  for (const s of Object.keys(A.CLAVE)) E[s] = d[s] || {}
+  E.marca = m; recalcula(); aplicaTema(); pinta()
 }
 async function guardaKV(k, v, t) { const o = { k, v, actualizado: t || Date.now() }; E.kv[k] = o; await escribe('kv', o) }
 async function ajusta(cambios) { await guardaKV('ajustes', { ...aj(), ...cambios }) }
@@ -367,7 +377,7 @@ const tarjetaAviso = ([cls, icono, t, sub, destino]) => {
 function vHoy() {
   const f = F.hoyISO(), d = dia(f), p = diaPlan(f), fz = fuentes(p.lunes)[p.i]
   const P = perfil(), n = cuentaPlan(d), sinRef = diasSinRefresco(), sem = numSemana(f)
-  const tarjetas = []
+  const tarjetas = [tarjetaInstalar()].filter(Boolean)
   const m = kv('mensaje', null)
   if (m?.texto && !m.visto) {
     tarjetas.push(`<div class="card ter"><div class="fila entre"><b>${ms('smart_toy', true)} Jarvis te dejó un mensaje</b><button class="ib" data-a="mensaje-visto" aria-label="Ya lo leí">${ms('close')}</button></div><p>${esc(m.texto)}</p>${m.fecha ? `<div class="s">${esc(F.cuando(Date.parse(m.fecha)))}</div>` : ''}</div>`)
@@ -668,20 +678,44 @@ function vJarvis() {
     <button class="btn ancho" data-a="mandar">${ms('cloud_upload')} Mandar a Jarvis</button>
     <p class="s" style="text-align:center">Se copia tu paquete y se abre Mi plan en Claude: ahí lo pegas y tocas «Guardar en Claude».</p>
     <button class="btn ancho ton" data-a="traer">${ms('cloud_download')} Traer de Jarvis</button>
-    <p class="s" style="text-align:center">Primero, en Mi plan en Claude toca «Copiar para mi teléfono».</p>
+    <p class="s" style="text-align:center">Lo más fácil: en Mi plan en Claude toca «Abrir Mi plan con mis datos» y llegan solos.</p>
     ${url ? `<a class="btn ancho out" href="${esc(url)}" target="_blank" rel="noopener">${ms('open_in_new')} Abrir Mi plan en Claude</a>` : `<div class="card ambar">Todavía no tengo el enlace de tu página de Claude. Llega solo la primera vez que traes algo de Jarvis.</div>`}
     <p class="s" style="text-align:center">${ms('lock')} Tus datos solo salen de este teléfono cuando tú los mandas.</p>`
   return { barra: atras('#yo', 'Jarvis'), cuerpo, nav: 'yo' }
+}
+
+// ¿Corre como app instalada o en una pestaña? ¿En un teléfono o en una computadora?
+const comoApp = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true
+// Se mide una vez al abrir: un teléfono no deja de ser táctil a media sesión.
+const EN_COMPU = !matchMedia('(pointer: coarse)').matches
+const enCompu = () => EN_COMPU
+function tarjetaInstalar() {
+  if (comoApp() || E.ui.sinInstala) return ''
+  if (enCompu()) {
+    return `<div class="card ter" id="instala"><b>${ms('install_mobile', true)} Mi plan es para tu teléfono</b>
+      <p style="margin-top:6px">Para pasarla con tus datos, abre <b>Mi plan en Claude</b> en esta computadora y apunta la cámara de tu teléfono al código que aparece.</p></div>`
+  }
+  if (aj().instalada) {
+    return `<div class="card ter" id="instala"><div class="fila entre"><b>${ms('check_circle', true)} Ya tienes Mi plan instalada</b><button class="ib" data-a="instala-cierra" aria-label="Cerrar">${ms('close')}</button></div>
+      <p style="margin-top:6px">Búscala en tu pantalla como «Mi plan» y ábrela desde ahí. Esta pestaña ya la puedes cerrar.</p>
+      <button class="btn texto" data-a="no-la-encuentro" style="padding:0">No la encuentro</button></div>`
+  }
+  return `<div class="card tono" id="instala"><b>${ms('install_mobile', true)} Ponla como app en tu teléfono</b>
+    <p style="margin:6px 0 12px">Así la abres desde su icono, sin el navegador y sin internet.</p>
+    ${E.instalar ? `<button class="btn ancho" data-a="instalar">${ms('download')} Instalar Mi plan</button>`
+      : `<ol class="pasos-n"><li>Toca los tres puntos ${ms('more_vert')} de Chrome, arriba a la derecha.</li><li>Toca <b>Instalar app</b> o <b>Agregar a la pantalla principal</b>.</li><li>Toca <b>Instalar</b>.</li></ol>`}
+    <button class="btn texto" data-a="instalada" style="padding:0;margin-top:6px">Ya la instalé</button></div>`
 }
 
 function vBienvenida() {
   return `<div class="bienvenida">
     <div class="logo">${emo('🥗')}</div>
     <div><div class="h1" style="font-size:30px">Mi plan</div><div class="s" style="font-size:16px">Tu comida, tu súper y tu peso. Funciona sin internet.</div></div>
-    <div class="card"><h3>Para empezar</h3><ol class="pasos-n"><li>Abre <b>Mi plan en Claude</b>, el enlace que te mandó Jarvis.</li><li>Toca <b>Copiar para mi teléfono</b>.</li><li>Regresa aquí y toca <b>Traer de Jarvis</b>.</li></ol></div>
-    <button class="btn ancho" data-a="traer">${ms('cloud_download')} Traer de Jarvis</button>
+    ${tarjetaInstalar()}
+    ${enCompu() ? '' : `<div class="card"><h3>Para traer tus datos</h3><ol class="pasos-n"><li>En tu computadora abre <b>Mi plan en Claude</b>, el enlace que te mandó Jarvis.</li><li>Apunta la cámara de este teléfono al código que aparece y toca el enlace.</li></ol>
+      <p class="s" style="margin-top:10px">Si abriste Mi plan en Claude en este teléfono, toca ahí <b>Abrir Mi plan con mis datos</b>.</p></div>`}
+    <button class="btn ancho ton" data-a="traer">${ms('content_paste')} Traer de Jarvis</button>
     <button class="btn ancho texto" data-a="sin-jarvis">Empezar sin Jarvis</button>
-    ${E.instalar ? `<button class="btn ancho ton" data-a="instalar">${ms('install_mobile')} Instalar Mi plan</button>` : ''}
     <p class="s">${ms('lock')} Tus datos se guardan en este teléfono. Solo salen cuando tú los mandas a tu Claude.</p></div>`
 }
 
@@ -837,8 +871,10 @@ function hItem(id) {
     ${x.extra ? `<button class="btn texto ancho" style="color:var(--err)" data-a="item-quita" data-id="${esc(id)}">Quitar de la lista</button>` : ''}`)
 }
 function hPegar(tipo) {
+  const url = aj().urlClaude || perfil()?.urlClaude
   abreHoja(`<div class="ht">${ms('content_paste')} Pega aquí</div>
-    <div class="s">${tipo === 'traer' ? 'En Mi plan en Claude toca «Copiar para mi teléfono». Luego deja el dedo en el cuadro y toca «Pegar».' : 'Deja el dedo en el cuadro y toca «Pegar».'}</div>
+    <div class="s">${tipo === 'traer' ? 'Lo más fácil: en Mi plan en Claude toca «Abrir Mi plan con mis datos» y llegan solos. Si no se abre, toca allá «Copiar para mi teléfono», regresa aquí, deja el dedo en el cuadro y toca «Pegar».' : 'Deja el dedo en el cuadro y toca «Pegar».'}</div>
+    ${tipo === 'traer' && url ? `<a class="btn ancho out" href="${esc(url)}" target="_blank" rel="noopener" data-a="cierra-tras">${ms('open_in_new')} Abrir Mi plan en Claude</a>` : ''}
     <textarea id="pega" class="area" placeholder="Deja el dedo aquí y toca Pegar"></textarea>
     <button class="btn ancho" data-a="pega-ok">${ms('cloud_download')} Traer</button>`)
 }
@@ -934,16 +970,41 @@ async function aplicaPaquete(p) {
   recalcula(); aplicaTema()
   return n
 }
-async function traeTexto(txt) {
+// Mi plan en Claude abre la app con el paquete después del #: «#de-jarvis=1.<base64url de deflate-raw>»
+// (0. si va sin comprimir). Lo que va después del # no sale del teléfono: GitHub nunca lo ve.
+async function desempaca(c) {
+  const v = c.slice(0, 2), b = atob(c.slice(2).replace(/-/g, '+').replace(/_/g, '/'))
+  let u = Uint8Array.from(b, (x) => x.charCodeAt(0))
+  if (v === '1.') u = new Uint8Array(await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer())
+  else if (v !== '0.') throw new Error('Ese enlace no es de Mi plan')
+  return JSON.parse(new TextDecoder().decode(u))
+}
+async function traeEnlace() {
+  const h = location.hash
+  if (!h.startsWith('#de-jarvis=')) return false
+  history.replaceState(null, '', location.pathname + '#hoy')
   try {
-    const n = await aplicaPaquete(leePaquete(txt))
-    persiste()
-    const partes = [n.perfil ? 'tus datos' : '', n.recetas ? `${n.recetas} receta${n.recetas > 1 ? 's' : ''}` : '', n.menus ? `${n.menus} menú${n.menus > 1 ? 's' : ''}` : '',
-      n.pesos ? `${n.pesos} peso${n.pesos > 1 ? 's' : ''}` : '', n.dias ? `${n.dias} día${n.dias > 1 ? 's' : ''}` : '', n.precios ? `${n.precios} precio${n.precios > 1 ? 's' : ''}` : ''].filter(Boolean)
-    cierraHoja()
-    aviso(partes.length ? 'Listo: llegaron ' + partes.join(', ') + '.' : 'Listo: ya tenías todo lo de Jarvis.')
+    const p = await desempaca(decodeURIComponent(h.slice(11)))
+    if (!p || p.miplan !== 1) throw new Error('Ese enlace no es de Mi plan')
+    await traePaquete(p)
+  } catch (e) {
+    const cortado = e instanceof SyntaxError || e?.name === 'InvalidCharacterError' || e instanceof TypeError
+    aviso(cortado ? 'El enlace llegó cortado. Ábrelo otra vez desde Mi plan en Claude.' : e?.message || String(e), 'mal')
     pinta(true)
-  } catch (e) { aviso(e.message || String(e), 'mal') }
+  }
+  return true
+}
+async function traeTexto(txt) {
+  try { await traePaquete(leePaquete(txt)) } catch (e) { aviso(e.message || String(e), 'mal') }
+}
+async function traePaquete(p) {
+  const n = await aplicaPaquete(p)
+  persiste()
+  const partes = [n.perfil ? 'tus datos' : '', n.recetas ? `${n.recetas} receta${n.recetas > 1 ? 's' : ''}` : '', n.menus ? `${n.menus} menú${n.menus > 1 ? 's' : ''}` : '',
+    n.pesos ? `${n.pesos} peso${n.pesos > 1 ? 's' : ''}` : '', n.dias ? `${n.dias} día${n.dias > 1 ? 's' : ''}` : '', n.precios ? `${n.precios} precio${n.precios > 1 ? 's' : ''}` : ''].filter(Boolean)
+  cierraHoja()
+  aviso(partes.length ? 'Listo: llegaron ' + partes.join(', ') + '.' : 'Listo: ya tenías todo lo de Jarvis.')
+  pinta(true)
 }
 async function copia(texto) {
   try { await navigator.clipboard.writeText(texto); return true } catch (e) { /* se intenta a la antigua */ }
@@ -1166,7 +1227,18 @@ const ACC = {
     await A.borraTodo(); for (const s of Object.keys(A.CLAVE)) E[s] = {}; recalcula(); aplicaTema(); location.hash = ''; pinta(true)
   }),
   'confirma-ok': async () => { const f = E.h?.accion; cierraHoja(); if (f) await f() },
-  'instalar': async () => { if (!E.instalar) return; E.instalar.prompt(); try { await E.instalar.userChoice } catch (e) { /* nada */ } E.instalar = null; pinta() },
+  'instalar': async () => {
+    if (!E.instalar) return
+    E.instalar.prompt()
+    let r = null
+    try { r = await E.instalar.userChoice } catch (e) { /* nada */ }
+    E.instalar = null
+    if (r?.outcome === 'accepted') await ajusta({ instalada: true })
+    pinta()
+  },
+  'instalada': async () => { await ajusta({ instalada: true }); pinta() },
+  'no-la-encuentro': async () => { await ajusta({ instalada: false }); pinta() },
+  'instala-cierra': () => { E.ui.sinInstala = true; pinta() },
   // Jarvis
   'mandar': async () => {
     const txt = JSON.stringify(paqueteParaJarvis())
@@ -1214,11 +1286,17 @@ document.addEventListener('change', async (ev) => {
   const file = ev.target.files?.[0]; if (!file) return
   try { await traeTexto(await file.text()) } finally { ev.target.value = '' }
 })
-window.addEventListener('hashchange', () => { if (E.hojaAbierta) { E.hojaAbierta = false; quitaCapa() } E.ui.porciones = 1; pinta(true) })
+window.addEventListener('hashchange', () => {
+  if (E.hojaAbierta) { E.hojaAbierta = false; quitaCapa() }
+  if (location.hash.startsWith('#de-jarvis=')) { traeEnlace(); return }
+  E.ui.porciones = 1; pinta(true)
+})
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') recargaSiCambio().catch(() => {}) })
+window.addEventListener('storage', (e) => { if (e.key === 'miplan-marca') recargaSiCambio().catch(() => {}) })
 window.addEventListener('error', (e) => aviso('Algo falló: ' + (e.message || 'error'), 'mal'))
 window.addEventListener('unhandledrejection', (e) => aviso('Algo falló: ' + (e.reason?.message || e.reason || 'error'), 'mal'))
-window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); E.instalar = e; if (!perfil() || ruta().r === 'ajustes') pinta() })
-window.addEventListener('appinstalled', () => { E.instalar = null; aviso('¡Listo! Mi plan ya está en tu pantalla de inicio.'); persiste() })
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); E.instalar = e; if (!perfil() || $('#instala') || ruta().r === 'ajustes') pinta() })
+window.addEventListener('appinstalled', async () => { E.instalar = null; aviso('¡Listo! Mi plan ya está en tu pantalla de inicio.'); persiste(); await ajusta({ instalada: true }); pinta() })
 matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', aplicaTema)
 setInterval(() => { if ((aj().tema || 'auto') === 'hora') aplicaTema() }, 60000)
 
@@ -1233,11 +1311,13 @@ async function arranca() {
     return
   }
   recalcula(); aplicaTema()
+  try { E.marca = localStorage.getItem('miplan-marca') } catch (e) { /* sin localStorage */ }
+  if (comoApp() && !aj().instalada) await ajusta({ instalada: true })
   const q = new URLSearchParams(location.search), atajo = q.get('atajo')
   if (atajo) history.replaceState(null, '', location.pathname + '#' + (atajo === 'super' ? 'super' : 'hoy'))
-  pinta(true)
+  if (!(await traeEnlace())) pinta(true)
   if (atajo === 'peso' && perfil()) ACC.peso()
-  window.__miplan = { E, F, diaPlan, fuentes, listaSuper, preparar, costo, paqueteParaJarvis, aplicaPaquete, VERSION }
+  window.__miplan = { E, F, diaPlan, fuentes, listaSuper, preparar, costo, paqueteParaJarvis, aplicaPaquete, desempaca, VERSION }
 
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     const habia = !!navigator.serviceWorker.controller

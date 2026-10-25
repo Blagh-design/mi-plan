@@ -1,6 +1,6 @@
 // Mi plan · trabajador de fondo: guarda la app en el teléfono para que abra sin internet.
 // Al publicar una versión nueva, cambia VERSION: el teléfono baja la nueva y avisa «Actualizar».
-const VERSION = '1.0.0'
+const VERSION = '1.1.0'
 const CACHE = 'miplan-' + VERSION
 const ARCHIVOS = [
   './', './index.html', './manifest.webmanifest', './css/app.css',
