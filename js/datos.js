@@ -3,7 +3,7 @@
 // o se escriben en el teléfono, y se quedan en el teléfono.
 // Precios: promedios de Profeco (abr–may 2026) o estimados; cada quien los cambia en su teléfono.
 
-export const VERSION = '1.1.0'
+export const VERSION = '1.2.0'
 
 export const COMIDAS = ['desayuno', 'comida', 'tarde', 'cena']
 export const NOMBRE_COMIDA = { desayuno: 'Desayuno', comida: 'Comida', tarde: 'Tarde', cena: 'Cena' }
@@ -18,7 +18,7 @@ export const PRODUCTOS = {
   atun: { n: 'Atún en agua', paq: '1 lata', precio: 20, rinde: 1, g: 'prot', f: 'estimado', lata: true },
   quesillo: { n: 'Quesillo', paq: '1 bola chica', precio: 20, rinde: 3, g: 'prot', f: 'tienda' },
   jamon: { n: 'Jamón', paq: '250 g', precio: 30, rinde: 12, g: 'prot', f: 'tienda' },
-  frijol: { n: 'Frijol negro', paq: '1 kg · rinde 2 semanas', precio: 24, rinde: 28, g: 'abarrotes', f: 'Profeco' },
+  frijol: { n: 'Frijoles refritos de bolsa', paq: 'bolsa de 430 g', precio: 24, rinde: 3.5, g: 'abarrotes', f: 'estimado' },
   avena: { n: 'Avena', paq: 'bolsa de 400 g', precio: 22, rinde: 10, g: 'abarrotes', f: 'estimado' },
   tortilla: { n: 'Tortilla', paq: '1 kg', precio: 24, rinde: 33, g: 'tortilla', f: 'Profeco' },
   pan: { n: 'Pan integral', paq: '1 bolsa', precio: 45, rinde: 16, g: 'tortilla', f: 'estimado' },
@@ -42,7 +42,7 @@ export const PRODUCTOS = {
 // refri: días que aguanta cocinado en el refri. congela: si se puede congelar. lote: se cocina junto con otras.
 export const RECETAS = [
   {
-    id: 'huevo-mexicana', n: 'Huevo a la mexicana', e: '🍳', c: 'desayuno', min: 15, kcal: 445, prot: 19, prep: 'fresco',
+    id: 'huevo-mexicana', n: 'Huevo a la mexicana', e: '🍳', c: 'desayuno', min: 15, kcal: 465, prot: 19, prep: 'fresco',
     ing: [{ q: 2, t: 'huevos', p: 'huevo' }, { t: 'Jitomate, cebolla y chile picados', $: 5 },
       { q: 0.5, u: 'taza', t: 'de frijoles', p: 'frijol', pq: 1 }, { q: 2, t: 'tortillas', p: 'tortilla' },
       { q: 1, u: 'cucharadita', t: 'de aceite' }],
@@ -58,7 +58,7 @@ export const RECETAS = [
     nota: 'El jamón es carne procesada: mejor de vez en cuando.',
   },
   {
-    id: 'quesadillas', n: 'Quesadillas ligeras', e: '🫓', c: 'desayuno', min: 10, kcal: 365, prot: 17, prep: 'fresco',
+    id: 'quesadillas', n: 'Quesadillas ligeras', e: '🫓', c: 'desayuno', min: 10, kcal: 385, prot: 17, prep: 'fresco',
     ing: [{ q: 2, t: 'tortillas', p: 'tortilla' }, { q: 1, u: 'tira', t: 'de quesillo', p: 'quesillo' },
       { t: 'Jitomate y calabacita picados', $: 3 }, { q: 0.5, u: 'taza', t: 'de frijoles, aparte', p: 'frijol', pq: 1 }],
     pasos: ['Calienta las tortillas en el comal, sin aceite.', 'Pon el quesillo, el jitomate y la calabacita; dobla y dora de los dos lados.',
@@ -79,13 +79,13 @@ export const RECETAS = [
       'El huevo cocido va aparte.'],
   },
   {
-    id: 'comida-domingo', descongela: 'la milanesa', n: 'Milanesa con arroz y frijoles', e: '🍲', c: 'comida', min: 25, kcal: 595, prot: 39,
+    id: 'comida-domingo', descongela: 'la milanesa', n: 'Milanesa con arroz', e: '🍲', c: 'comida', min: 25, kcal: 485, prot: 32,
     prep: 'domingo', lote: 'milanesas', refri: 3, congela: true,
     ing: [{ q: 1, t: 'milanesa de pechuga', p: 'pechuga' }, { q: 0.5, u: 'taza', t: 'de arroz cocido', $: 1.5 },
-      { q: 0.5, u: 'taza', t: 'de frijoles', p: 'frijol', pq: 1 }, { t: 'Ensalada de pepino y jitomate', $: 5 },
+      { t: 'Ensalada de pepino y jitomate', $: 5 },
       { q: 2, t: 'tortillas', p: 'tortilla' }],
     pasos: ['Calienta la milanesa. Si estaba congelada, pásala al refri la noche anterior.',
-      'Sirve con el arroz, los frijoles, la ensalada y las tortillas.'],
+      'Sirve con el arroz, la ensalada y las tortillas.'],
     nota: 'El domingo no hay fonda: esta es tu comida.',
   },
   {
@@ -101,13 +101,12 @@ export const RECETAS = [
     pasos: ['Del traste que picaste el domingo.', 'Exprime limón y ponle chile.'],
   },
   {
-    id: 'milanesa-asada', descongela: 'la milanesa', n: 'Milanesa asada', e: '🍗', c: 'cena', min: 20, kcal: 410, prot: 37,
+    id: 'milanesa-asada', descongela: 'la milanesa', n: 'Milanesa asada', e: '🍗', c: 'cena', min: 20, kcal: 300, prot: 30,
     prep: 'domingo', lote: 'milanesas', refri: 3, congela: true,
     ing: [{ q: 1, t: 'milanesa de pechuga (unos 125 g)', p: 'pechuga' }, { q: 1, u: 'cucharadita', t: 'de aceite; sal, pimienta y limón' },
-      { t: 'Ensalada de pepino y jitomate', $: 5 }, { q: 0.5, u: 'taza', t: 'de frijoles', p: 'frijol', pq: 1 },
-      { q: 1, t: 'tortilla', p: 'tortilla' }],
+      { t: 'Ensalada de pepino y jitomate', $: 5 }, { q: 1, t: 'tortilla', p: 'tortilla' }],
     pasos: ['Sazona la pechuga con sal, pimienta y limón.', 'Sartén bien caliente con la cucharadita de aceite: 4 minutos por lado.',
-      'Sirve con la ensalada, los frijoles y la tortilla.'],
+      'Sirve con la ensalada y la tortilla.'],
     nota: 'Se asa el domingo: dura 3 días en el refri; las demás, al congelador.',
   },
   {
@@ -127,12 +126,11 @@ export const RECETAS = [
     nota: 'Barata y con omega-3, que ayuda con los triglicéridos.',
   },
   {
-    id: 'huevo-calabacita', n: 'Huevo con calabacita', e: '🥚', c: 'cena', min: 15, kcal: 385, prot: 21, prep: 'fresco',
+    id: 'huevo-calabacita', n: 'Huevo con calabacita', e: '🥚', c: 'cena', min: 15, kcal: 275, prot: 14, prep: 'fresco',
     ing: [{ q: 2, t: 'huevos', p: 'huevo' }, { q: 1, t: 'calabacita picada', $: 3 },
-      { q: 0.5, u: 'taza', t: 'de frijoles', p: 'frijol', pq: 1 }, { q: 1, t: 'tortilla', p: 'tortilla' },
-      { q: 1, u: 'cucharadita', t: 'de aceite' }],
+      { q: 1, t: 'tortilla', p: 'tortilla' }, { q: 1, u: 'cucharadita', t: 'de aceite' }],
     pasos: ['Sofríe la calabacita picada 3 minutos con la cucharadita de aceite.', 'Agrega los huevos batidos con sal y mueve hasta que cuajen.',
-      'Sirve con los frijoles y la tortilla.'],
+      'Sirve con la tortilla.'],
   },
   {
     id: 'torta-ligera', n: 'Torta ligera', e: '🥖', c: 'cena', min: 10, kcal: 435, prot: 24,

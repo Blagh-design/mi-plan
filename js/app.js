@@ -190,10 +190,6 @@ function etiquetaFuente(f) {
     default: return ''
   }
 }
-function frijolToca(L) {
-  const P = perfil(), base = P?.inicio ? F.lunesDe(P.inicio) : '2026-01-05'
-  return Math.abs(Math.round(F.dif(base, L) / 7)) % 2 === 0
-}
 function usos(L) {
   const u = {}
   for (let i = 0; i < 7; i++) {
@@ -211,7 +207,6 @@ function listaSuper(L) {
     const P = prod(id), need = u[id]?.n || 0
     let n = 0
     if (P.lata) n = Math.max(fz.nuevas[id] || 0, Math.ceil(need / (P.rinde || 1) - 1e-9))
-    else if (id === 'frijol') n = need ? (frijolToca(L) ? 1 : 0) : 0
     else if (P.base) n = Math.max(1, Math.ceil(need / (P.rinde || 1e9) - 1e-9))
     else if (need) n = Math.ceil(need / (P.rinde || 1) - 1e-9)
     if (!n) continue
@@ -237,15 +232,6 @@ function preparar(L) {
   const diasTxt = (arr) => arr.map((i) => F.DIAS_C[(i + 1) % 7].toLowerCase()).join(', ')
   const hasta = (n) => F.DIAS[F.dow(F.suma(L, n - 1))]
   const pasos = [], guardado = []
-  if (usos(L).frijol) {
-    if (frijolToca(L)) {
-      pasos.push({ id: 'frijol', t: 'Pon la olla de frijoles (1 kg)', k: '1 h 30 min en olla normal, unos 40 min en olla exprés. Mientras, haz lo demás. Lo de lunes a miércoles va al refri; lo demás, en porciones al congelador: rinde 2 semanas.', seg: 90 * 60 })
-      guardado.push(['verde', 'kitchen', 'Frijoles · hasta el miércoles'], ['hielo', 'ac_unit', 'Frijoles en porciones'])
-    } else {
-      pasos.push({ id: 'frijol', t: 'Pasa frijoles del congelador al refri', k: 'Los que guardaste la semana pasada: lo de lunes a miércoles.' })
-      guardado.push(['verde', 'kitchen', 'Frijoles · del congelador'])
-    }
-  }
   for (const [k, l] of Object.entries(lotes)) {
     const n = l.refri.length + l.cong.length + l.pasado.length
     const rep = (arr, dest) => (arr.length ? `${arr.length} ${dest} (${diasTxt(arr)})` : '')
@@ -273,14 +259,14 @@ function preparar(L) {
   return { domingo: F.suma(L, -1), pasos, guardado }
 }
 
-// Lo que hay que hacer en la noche para mañana (descongelar, frijoles, picar).
+// Lo que hay que hacer en la noche para mañana (descongelar, picar).
 function recordatorios(f) {
   const out = [], m = F.suma(f, 1), pm = diaPlan(m), fm = fuentes(pm.lunes)[pm.i]
   const cong = [...new Set(COMIDAS.filter((c) => fm[c]?.t === 'congelada').map((c) => pm[c].descongela || pm[c].n.toLowerCase()))]
   if (cong.length) out.push(['hielo', 'ac_unit', `Esta noche pasa al refri: ${cong.join(' y ')}`, 'Es para mañana. Así se descongela despacio y sin riesgo.'])
-  if (F.dow(f) === 3 && usos(F.lunesDe(f)).frijol) out.push(['hielo', 'ac_unit', 'Esta noche pasa al refri los frijoles del congelador', 'Para jueves a domingo. Y pica más jícama, pepino y zanahoria.'])
+  if (F.dow(f) === 3) out.push(['tono', 'eco', 'Esta noche pica más jícama, pepino y zanahoria', 'Para tu botana de jueves a domingo.'])
   if (F.dow(f) === 6) out.push(['ter', 'shopping_cart', 'Mañana: súper y preparar la semana', 'Revisa tu lista antes de salir.', '#super'])
-  if (F.dow(f) === 0) out.push(['tono', 'skillet', 'Hoy toca preparar tu semana', 'Unos 90 minutos, casi todo es esperar los frijoles.', '#preparar'])
+  if (F.dow(f) === 0) out.push(['tono', 'skillet', 'Hoy toca preparar tu semana', 'Unos 40 minutos: milanesas, huevos cocidos y verdura.', '#preparar'])
   if (F.dow(f) === 1 && !E.pesos[f]?.kg) out.push(['ter', 'monitor_weight', 'Hoy es lunes: pésate en ayunas', 'Después del baño, con la misma báscula.', 'peso'])
   return out
 }
