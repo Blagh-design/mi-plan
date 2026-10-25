@@ -3,7 +3,7 @@
 // o se escriben en el teléfono, y se quedan en el teléfono.
 // Precios: promedios de Profeco (abr–may 2026) o estimados; cada quien los cambia en su teléfono.
 
-export const VERSION = '1.2.0'
+export const VERSION = '1.2.1'
 
 export const COMIDAS = ['desayuno', 'comida', 'tarde', 'cena']
 export const NOMBRE_COMIDA = { desayuno: 'Desayuno', comida: 'Comida', tarde: 'Tarde', cena: 'Cena' }
@@ -79,13 +79,13 @@ export const RECETAS = [
       'El huevo cocido va aparte.'],
   },
   {
-    id: 'comida-domingo', descongela: 'la milanesa', n: 'Milanesa con arroz', e: '🍲', c: 'comida', min: 25, kcal: 485, prot: 32,
+    id: 'comida-domingo', descongela: 'la milanesa', n: 'Milanesa con arroz y frijoles', e: '🍲', c: 'comida', min: 25, kcal: 615, prot: 39,
     prep: 'domingo', lote: 'milanesas', refri: 3, congela: true,
     ing: [{ q: 1, t: 'milanesa de pechuga', p: 'pechuga' }, { q: 0.5, u: 'taza', t: 'de arroz cocido', $: 1.5 },
-      { t: 'Ensalada de pepino y jitomate', $: 5 },
+      { q: 0.5, u: 'taza', t: 'de frijoles', p: 'frijol', pq: 1 }, { t: 'Ensalada de pepino y jitomate', $: 5 },
       { q: 2, t: 'tortillas', p: 'tortilla' }],
     pasos: ['Calienta la milanesa. Si estaba congelada, pásala al refri la noche anterior.',
-      'Sirve con el arroz, la ensalada y las tortillas.'],
+      'Sirve con el arroz, los frijoles, la ensalada y las tortillas.'],
     nota: 'El domingo no hay fonda: esta es tu comida.',
   },
   {
@@ -126,8 +126,8 @@ export const RECETAS = [
     nota: 'Barata y con omega-3, que ayuda con los triglicéridos.',
   },
   {
-    id: 'huevo-calabacita', n: 'Huevo con calabacita', e: '🥚', c: 'cena', min: 15, kcal: 275, prot: 14, prep: 'fresco',
-    ing: [{ q: 2, t: 'huevos', p: 'huevo' }, { q: 1, t: 'calabacita picada', $: 3 },
+    id: 'huevo-calabacita', n: 'Huevo con calabacita', e: '🥚', c: 'cena', min: 15, kcal: 345, prot: 20, prep: 'fresco',
+    ing: [{ q: 3, t: 'huevos', p: 'huevo' }, { q: 1, t: 'calabacita picada', $: 3 },
       { q: 1, t: 'tortilla', p: 'tortilla' }, { q: 1, u: 'cucharadita', t: 'de aceite' }],
     pasos: ['Sofríe la calabacita picada 3 minutos con la cucharadita de aceite.', 'Agrega los huevos batidos con sal y mueve hasta que cuajen.',
       'Sirve con la tortilla.'],
